@@ -18,10 +18,10 @@
 
 // 文件系统元配置（来自模块参数）
 struct myfs_fs_info {
-    unsigned long fs_max_size;      // 文件系统总大小限制，默认是MAX_FS_SIZE
-    unsigned long file_max_size;    // 文件大小限制，默认是MAX_LFS_FILESIZE
-    unsigned long block_size;       // 默认是PAGE_CACHE_SIZE
-    umode_t root_mode;              // 文件系统根目录权限位，默认是DEFAULT_MODE
+	unsigned long fs_max_size;	  // 文件系统总大小限制，默认是MAX_FS_SIZE
+	unsigned long file_max_size;	// 文件大小限制，默认是MAX_LFS_FILESIZE
+	unsigned long block_size;	   // 默认是PAGE_CACHE_SIZE
+	umode_t root_mode;			  // 文件系统根目录权限位，默认是DEFAULT_MODE
 };
 
 extern const struct super_operations myfs_super_ops;

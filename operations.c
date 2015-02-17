@@ -12,9 +12,9 @@
  */
 int myset_page_dirty_no_writeback(struct page *page)
 {
-    if (!PageDirty(page))
-        return !TestSetPageDirty(page);
-    return 0;
+	if (!PageDirty(page))
+		return !TestSetPageDirty(page);
+	return 0;
 }
 
 
@@ -92,7 +92,9 @@ const struct super_operations myfs_super_ops = {
 
 static const struct file_operations myfs_file_operations = {
 	.read		= do_sync_read,
+	.aio_read	= generic_file_aio_read,
 	.write		= do_sync_write,
+	.aio_write	= generic_file_aio_write,
 	.mmap		= generic_file_mmap,
 	.fsync		= noop_fsync,
 	.splice_read	= generic_file_splice_read,
