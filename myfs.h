@@ -33,4 +33,14 @@ extern const struct super_operations myfs_super_ops;
 struct inode *myfs_get_inode(struct super_block *sb,
 				const struct inode *dir, umode_t mode, dev_t dev);
 
+struct myfs_hook_operations {
+	int (*create_inode)(inode * pnode),
+	int (*destroy_inode)(inode * pnode)
+};
+
+extern struct myfs_hook_operations myfs_hook_ops;
+
+extern int myfs_hook_reg_create(int (*fun)(struct inode * inode));
+extern int myfs_hook_reg_delete(int (*fun)(struct inode * inode));
+
 #endif // MYFS_H_INCLUDED

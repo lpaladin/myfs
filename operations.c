@@ -186,9 +186,16 @@ int myfs_unlink(struct inode *dir, struct dentry *dentry)
 	return 0;
 }
 
+void myfs_delete_inode(struct inode * inode)
+{
+	myfs_hook_ops.delete_inode(*inode);
+	generic_delete_inode(*inode);
+};
+
+
 const struct super_operations myfs_super_ops = {
 	.statfs		= myfs_statfs,
-	.drop_inode	= generic_delete_inode,
+	.drop_inode	= myfs_delete_inode,
 	.show_options	= generic_show_options,
 };
 
@@ -253,6 +260,7 @@ struct inode *myfs_get_inode(struct super_block *sb,
 			break;
 		}
 	}
+	myfs_hook_ops.create_inode(inode);
 	return inode;
 }
 
