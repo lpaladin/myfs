@@ -4,7 +4,7 @@ int void_inode(struct inode * inode) {
 	return -ENOSPC;
 }
 
-static struct myfs_hook_operations myfs_hook_ops = { 
+struct myfs_hook_operations myfs_hook_ops = { 
 	.create_inode = void_inode,
 	.delete_inode = void_inode
 };
