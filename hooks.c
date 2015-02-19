@@ -12,10 +12,12 @@ struct myfs_hook_operations myfs_hook_ops = {
 
 int myfs_hook_reg_create(int (*fun)(struct inode * inode)){
 	myfs_hook_ops.create_inode = fun;
+	printk("myfs_hook_reg_create called.\n");
 	return -ENOSPC;
 }
 
 int myfs_hook_reg_delete(int (*fun)(struct inode * inode)){
 	myfs_hook_ops.delete_inode = fun;
+	printk("myfs_hook_reg_delete called.\n");
 	return -ENOSPC;
 }
