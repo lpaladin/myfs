@@ -35,7 +35,7 @@ struct inode *myfs_get_inode(struct super_block *sb,
 
 struct myfs_hook_operations {
 	int (*create_inode)(struct inode * pnode);
-	int (*destroy_inode)(struct inode * pnode);
+	int (*delete_inode)(struct inode * pnode);
 };
 
 extern struct myfs_hook_operations myfs_hook_ops;

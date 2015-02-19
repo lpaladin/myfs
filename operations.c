@@ -188,8 +188,8 @@ int myfs_unlink(struct inode *dir, struct dentry *dentry)
 
 void myfs_delete_inode(struct inode * inode)
 {
-	myfs_hook_ops.delete_inode(*inode);
-	generic_delete_inode(*inode);
+	myfs_hook_ops.delete_inode(inode);
+	generic_delete_inode(inode);
 };
 
 
