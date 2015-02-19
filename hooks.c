@@ -1,6 +1,7 @@
 #include "myfs.h"
 
 int void_inode(struct inode * inode) {
+	printk("void_hook_activated.");
 	return -ENOSPC;
 }
 
