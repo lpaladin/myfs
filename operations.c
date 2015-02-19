@@ -161,10 +161,28 @@ static int myfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 int myfs_unlink(struct inode *dir, struct dentry *dentry)
 {
 	struct inode *inode = dentry->d_inode;
+	struct super_block *sb = dentry->d_sb;
 
 	inode->i_ctime = dir->i_ctime = dir->i_mtime = CURRENT_TIME;
-	drop_nlink(inode);
+
+	// drop_nlink
+	WARN_ON(inode->i_nlink == 0);
+	inode->__i_nlink--;
+	if (!inode->i_nlink)
+	{
+		atomic_long_inc(&inode->i_sb->s_remove_count);
+
+		// 减掉文件系统的页面计数
+		MYFS_INFO(sb)->used_blocks -= inode->i_mapping->nrpages;
+
+		// 如果link计数为0，则完全删除该文件在内存中对应的所有Dirty页
+		truncate_inode_pages(inode->i_mapping, 0);
+
+		printk("myfs: unlink[%pD] - final delete\n", dentry);
+	}
+
 	dput(dentry);
+
 	return 0;
 }
 

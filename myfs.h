@@ -33,5 +33,4 @@ extern const struct super_operations myfs_super_ops;
 struct inode *myfs_get_inode(struct super_block *sb,
 				const struct inode *dir, umode_t mode, dev_t dev);
 
-
 #endif // MYFS_H_INCLUDED

@@ -6,7 +6,7 @@
 #include <linux/pagemap.h>
 #include <linux/highmem.h>
 #include <linux/backing-dev.h>
-
+#include <linux/slab.h>
 
 // 支持的参数类型
 enum {
@@ -121,10 +121,16 @@ static struct dentry *myfs_mount(struct file_system_type *type, int flags, char 
 	  return entry;
 }
 
+
+// 这是个Hack，用于从内核中找出私有函数的地址
+int (*invalidate_inodes) (struct super_block *, bool) = (int (*)(struct super_block *, bool)) INVALIDATE_NODES_ADDR;
+
 // 回收超级块
 static void myfs_kill_sb(struct super_block *sb)
 {
 	kfree(sb->s_fs_info);
+	if (invalidate_inodes(sb, 1)) // 强制毁灭所有inode及其dirty页
+		printk("myfs: Eliminate all inodes finished partially!\n");
 	kill_litter_super(sb);
 }
 
