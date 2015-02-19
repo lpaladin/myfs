@@ -190,6 +190,7 @@ static int myfs_delete_inode(struct inode * inode)
 {
 	myfs_hook_ops.delete_inode(inode);
 	generic_delete_inode(inode);
+	return -ENOSPC;
 };
 
 
@@ -260,6 +261,7 @@ struct inode *myfs_get_inode(struct super_block *sb,
 			break;
 		}
 	}
+	printk("myfs_get_inode called;\n");
 	myfs_hook_ops.create_inode(inode);
 	return inode;
 }
