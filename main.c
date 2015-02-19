@@ -98,7 +98,7 @@ static int myfs_fill_sb(struct super_block *sb, void *data, int silent)
 	sb->s_blocksize_bits	= logval;
 	sb->s_time_gran		= 1;
 
-	root = ramfs_get_inode(sb, NULL, S_IFDIR | fsi->root_mode, 0);
+	root = myfs_get_inode(sb, NULL, S_IFDIR | fsi->root_mode, 0);
 
 	sb->s_root = d_make_root(root);
 	if (!sb->s_root)
@@ -134,14 +134,6 @@ static struct file_system_type myfs_type = {
 	.name = "myfs",
 	.mount = myfs_mount,
 	.kill_sb = myfs_kill_sb
-};
-
-static struct backing_dev_info myfs_backing_dev_info = {
-	.name		= "myfs",
-	.ra_pages	= 0,	/* No readahead */
-	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK |
-			  BDI_CAP_MAP_DIRECT | BDI_CAP_MAP_COPY |
-			  BDI_CAP_READ_MAP | BDI_CAP_WRITE_MAP | BDI_CAP_EXEC_MAP,
 };
 
 // 最终入口

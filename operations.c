@@ -4,6 +4,7 @@
 #include <linux/backing-dev.h>
 #include <linux/ramfs.h>
 #include <linux/mm.h>
+#include <linux/statfs.h>
 
 // ---直接照搬过来的部分---（起始）
 
@@ -25,14 +26,6 @@ static const struct address_space_operations ramfs_aops = {
 	.set_page_dirty	= myset_page_dirty_no_writeback,
 };
 
-static struct backing_dev_info ramfs_backing_dev_info = {
-	.name		= "ramfs",
-	.ra_pages	= 0,	/* No readahead */
-	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK |
-			  BDI_CAP_MAP_DIRECT | BDI_CAP_MAP_COPY |
-			  BDI_CAP_READ_MAP | BDI_CAP_WRITE_MAP | BDI_CAP_EXEC_MAP,
-};
-
 /*
  * File creation. Allocate an inode, and we're done..
  */
@@ -40,7 +33,7 @@ static struct backing_dev_info ramfs_backing_dev_info = {
 static int
 ramfs_mknod(struct inode *dir, struct dentry *dentry, umode_t mode, dev_t dev)
 {
-	struct inode * inode = ramfs_get_inode(dir->i_sb, dir, mode, dev);
+	struct inode * inode = myfs_get_inode(dir->i_sb, dir, mode, dev);
 	int error = -ENOSPC;
 
 	if (inode) {
@@ -70,7 +63,7 @@ static int ramfs_symlink(struct inode * dir, struct dentry *dentry, const char *
 	struct inode *inode;
 	int error = -ENOSPC;
 
-	inode = ramfs_get_inode(dir->i_sb, dir, S_IFLNK|S_IRWXUGO, 0);
+	inode = myfs_get_inode(dir->i_sb, dir, S_IFLNK|S_IRWXUGO, 0);
 	if (inode) {
 		int l = strlen(symname)+1;
 		error = page_symlink(inode, symname, l);
@@ -84,8 +77,19 @@ static int ramfs_symlink(struct inode * dir, struct dentry *dentry, const char *
 	return error;
 }
 
+static int myfs_statfs(struct dentry *dentry, struct kstatfs *buf)
+{
+	struct super_block *sb = dentry->d_sb;
+    buf->f_type = sb->s_magic;
+    buf->f_bsize = sb->s_blocksize;
+    buf->f_namelen = NAME_MAX;
+    buf->f_blocks = ((struct myfs_fs_info*) sb->s_fs_info)->fs_max_size / sb->s_blocksize;
+    printk("myfs: statfs - maxsize = %lu, maxblks = %llu", ((struct myfs_fs_info*) sb->s_fs_info)->fs_max_size, buf->f_blocks);
+    return 0;
+}
+
 const struct super_operations myfs_super_ops = {
-	.statfs		= simple_statfs,
+	.statfs		= myfs_statfs,
 	.drop_inode	= generic_delete_inode,
 	.show_options	= generic_show_options,
 };
@@ -119,7 +123,7 @@ static const struct inode_operations myfs_dir_inode_operations = {
 	.rename		= simple_rename,
 };
 
-struct inode *ramfs_get_inode(struct super_block *sb,
+struct inode *myfs_get_inode(struct super_block *sb,
 				const struct inode *dir, umode_t mode, dev_t dev)
 {
 	struct inode * inode = new_inode(sb);
@@ -128,7 +132,6 @@ struct inode *ramfs_get_inode(struct super_block *sb,
 		inode->i_ino = get_next_ino();
 		inode_init_owner(inode, dir, mode);
 		inode->i_mapping->a_ops = &ramfs_aops;
-		inode->i_mapping->backing_dev_info = &ramfs_backing_dev_info;
 		mapping_set_gfp_mask(inode->i_mapping, GFP_HIGHUSER);
 		mapping_set_unevictable(inode->i_mapping);
 		inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;

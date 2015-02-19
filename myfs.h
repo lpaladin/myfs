@@ -26,7 +26,7 @@ struct myfs_fs_info {
 
 extern const struct super_operations myfs_super_ops;
 
-struct inode *ramfs_get_inode(struct super_block *sb,
+struct inode *myfs_get_inode(struct super_block *sb,
 				const struct inode *dir, umode_t mode, dev_t dev);
 
 
