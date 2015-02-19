@@ -144,12 +144,12 @@ static struct file_system_type myfs_type = {
 
 
 int test_create_inode_hook(struct inode * inode) {
-	printk("create_hook_activated.");
+	printk("create_hook_activated.\n");
 	return -ENOSPC;
 }
 
 int test_delete_inode_hook(struct inode * inode) {
-	printk("delete_hook_activated.");
+	printk("delete_hook_activated.\n");
 	return -ENOSPC;
 }
 
