@@ -142,6 +142,18 @@ static struct file_system_type myfs_type = {
 	.kill_sb = myfs_kill_sb
 };
 
+
+int test_create_inode_hook(struct inode * inode) {
+	printk("create_hook_activated.");
+	return -ENOSPC;
+}
+
+int test_delete_inode_hook(struct inode * inode) {
+	printk("delete_hook_activated.");
+	return -ENOSPC;
+}
+
+
 MODULE_ALIAS_FS("myfs");
 
 // 最终入口
@@ -149,6 +161,9 @@ static int __init InstallFileSystem(void)
 {
 	int err;
 	printk("myfs: Here comes the /myfs/!\n");
+
+	myfs_hook_reg_create(test_create_inode_hook);
+	myfs_hook_reg_delete(test_delete_inode_hook);
 
 	err = register_filesystem(&myfs_type);
 	if (err)
