@@ -16,12 +16,16 @@
 // 文件系统默认权限
 #define DEFAULT_MODE 0755
 
+// 从sb获得文件系统特有类型的的fs_info
+#define MYFS_INFO(sb) ((struct myfs_fs_info*) ((sb)->s_fs_info))
+
 // 文件系统元配置（来自模块参数）
 struct myfs_fs_info {
-	unsigned long fs_max_size;	  // 文件系统总大小限制，默认是MAX_FS_SIZE
+	unsigned long fs_max_size;		// 文件系统总大小限制，默认是MAX_FS_SIZE
 	unsigned long file_max_size;	// 文件大小限制，默认是MAX_LFS_FILESIZE
-	unsigned long block_size;	   // 默认是PAGE_CACHE_SIZE
-	umode_t root_mode;			  // 文件系统根目录权限位，默认是DEFAULT_MODE
+	unsigned long block_size;		// 默认是PAGE_CACHE_SIZE
+	umode_t root_mode;				// 文件系统根目录权限位，默认是DEFAULT_MODE
+    unsigned long used_blocks;		// 文件系统已用页面数
 };
 
 extern const struct super_operations myfs_super_ops;

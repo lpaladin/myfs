@@ -136,6 +136,8 @@ static struct file_system_type myfs_type = {
 	.kill_sb = myfs_kill_sb
 };
 
+MODULE_ALIAS_FS("myfs");
+
 // 最终入口
 static int __init InstallFileSystem(void)
 {
@@ -145,7 +147,7 @@ static int __init InstallFileSystem(void)
 	err = register_filesystem(&myfs_type);
 	if (err)
 	{
-		printk("myfs: fs registration failed");
+		printk("myfs: fs registration failed\n");
 		return err;
 	}
 	return 0;
