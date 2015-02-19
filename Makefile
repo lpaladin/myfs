@@ -1,5 +1,6 @@
+hooks := test_hooks.o
 obj-m := myfs.o
-myfs-objs := main.o operations.o hooks.o test_hooks.o
+myfs-objs := main.o operations.o hooks.o
 
 INVALIDATE_NODES_ADDR = $(shell sudo cat /proc/kallsyms | grep invalidate_inodes | awk '{print $$1}')
 
