@@ -1,4 +1,3 @@
-hooks := test_hooks.o
 obj-m := myfs.o
 myfs-objs := main.o operations.o hooks.o
 
