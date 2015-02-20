@@ -16,7 +16,7 @@ static int __init InstallFileSystem(void)
 	myfs_hook_reg_create(test_create_inode_hook);
 	myfs_hook_reg_delete(test_delete_inode_hook);
 
-	return -ENOSPC;
+	return 0;
 }
 
 // 最终出口
