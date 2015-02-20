@@ -13,6 +13,8 @@ struct myfs_hook_operations myfs_hook_ops = {
 int myfs_hook_reg_create(int (*fun)(struct inode * inode)){
 	myfs_hook_ops.create_inode = fun;
 	printk("myfs_hook_reg_create called.\n");
+	(*(myfs_hook_ops.create_inode))(NULL);
+	(*fun)(NULL);
 	return -ENOSPC;
 }
 
