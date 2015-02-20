@@ -19,6 +19,8 @@
 // 从sb获得文件系统特有类型的的fs_info
 #define MYFS_INFO(sb) ((struct myfs_fs_info*) ((sb)->s_fs_info))
 
+typedef int (*hook_func)(struct inode*);
+
 // 文件系统元配置（来自模块参数）
 struct myfs_fs_info {
 	unsigned long fs_max_size;		// 文件系统总大小限制，默认是MAX_FS_SIZE
@@ -34,13 +36,13 @@ struct inode *myfs_get_inode(struct super_block *sb,
 				const struct inode *dir, umode_t mode, dev_t dev);
 
 struct myfs_hook_operations {
-	int (*create_inode)(struct inode * pnode);
-	int (*delete_inode)(struct inode * pnode);
+	hook_func create_inode;
+	hook_func delete_inode;
 };
 
 extern struct myfs_hook_operations myfs_hook_ops;
 
-extern int myfs_hook_reg_create(int (*fun)(struct inode * inode));
-extern int myfs_hook_reg_delete(int (*fun)(struct inode * inode));
+extern int myfs_hook_reg_create(hook_func);
+extern int myfs_hook_reg_delete(hook_func);
 
 #endif // MYFS_H_INCLUDED
