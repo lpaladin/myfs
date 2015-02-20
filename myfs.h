@@ -45,6 +45,6 @@ extern struct myfs_hook_operations myfs_hook_ops;
 extern int myfs_hook_reg_create(hook_func);
 extern int myfs_hook_reg_delete(hook_func);
 
-extern int myfs_hook_reg_entry();
+extern int myfs_hook_reg_entry(void);
 
 #endif // MYFS_H_INCLUDED
