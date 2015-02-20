@@ -26,7 +26,6 @@ static int __init InstallFileSystem(void)
 // 最终出口
 static void __exit UninstallFileSystem(void)
 {
-	unregister_filesystem(&myfs_type);
 	printk("myfs_hook: bye\n");
 }
 
