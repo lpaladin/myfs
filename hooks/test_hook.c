@@ -10,17 +10,13 @@ static int test_delete_inode_hook(struct inode * inode) {
 	return -ENOSPC;
 }
 
-MODULE_ALIAS_FS("myfs_hook");
-
 // 最终入口
 static int __init InstallFileSystem(void)
 {
-	int err;
-
 	myfs_hook_reg_create(test_create_inode_hook);
 	myfs_hook_reg_delete(test_delete_inode_hook);
 
-	return 0;
+	return -ENOSPC;
 }
 
 // 最终出口
