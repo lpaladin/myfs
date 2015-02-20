@@ -1,4 +1,4 @@
-obj-m := test_hooks.o
+obj-m := test_hook.o
 
 all:
 	@echo -e "\033[1;33;44mPlease notice that this module need root access to compile.\033[0m"
