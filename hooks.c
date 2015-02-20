@@ -15,9 +15,11 @@ int myfs_hook_reg_create(hook_func fun){
 	printk("myfs_hook_reg_create called.\n");
 	return -ENOSPC;
 }
+EXPORT_SYMBOL(myfs_hook_reg_create);
 
 int myfs_hook_reg_delete(hook_func fun) {
 	myfs_hook_ops.delete_inode = fun;
 	printk("myfs_hook_reg_delete called.\n");
 	return -ENOSPC;
 }
+EXPORT_SYMBOL(myfs_hook_reg_delete);
