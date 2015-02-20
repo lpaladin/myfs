@@ -29,7 +29,9 @@ EXPORT_SYMBOL(myfs_hook_reg_delete);
 /*
 * Modyfy below
 */
-int myfs_hook_reg_entry() {
+int myfs_hook_reg_entry(void) {
 	printk("hook_reg_entry\n");
+	myfs_hook_reg_create(void_inode);
+	myfs_hook_reg_delete(void_inode);
 	return -ENOSPC;
 }
