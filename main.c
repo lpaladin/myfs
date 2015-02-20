@@ -89,12 +89,15 @@ static int myfs_fill_sb(struct super_block *sb, void *data, int silent)
 	}
 
 	err = myfs_parse_options(data, fsi);
+	printk("myfs: options - blksz=%lu, filemsz=%lu, mode=%o, fssize=%lu!\n",
+		fsi->block_size, fsi->file_max_size, fsi->root_mode, fsi->fs_max_size);
 	if (err)
 		return err;
 
 	sb->s_maxbytes		= fsi->file_max_size;
 	sb->s_blocksize		= fsi->block_size;
 	for (logval = 0; fsi->block_size > 1; logval++, fsi->block_size >>= 1);
+	fsi->block_size = sb->s_blocksize;
 	sb->s_blocksize_bits	= logval;
 	sb->s_time_gran		= 1;
 

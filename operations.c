@@ -6,11 +6,7 @@
 #include <linux/mm.h>
 #include <linux/statfs.h>
 
-// ---直接照搬过来的部分---（起始）
-
-/*
- * For address_spaces which do not use buffers nor write back.
- */
+// 无回写无缓冲标志Dirty
 int myset_page_dirty_no_writeback(struct page *page)
 {
 	if (!PageDirty(page))
@@ -25,9 +21,14 @@ int myfs_write_begin(struct file *file, struct address_space *mapping,
 {
 	struct super_block *sb = mapping->host->i_sb;
 	struct page *page;
+	long maxblks = MYFS_INFO(sb)->fs_max_size / sb->s_blocksize;
+	long usedblks = atomic_long_read(&MYFS_INFO(sb)->used_blocks);
 	pgoff_t index;
 
-	if (MYFS_INFO(sb)->used_blocks >= MYFS_INFO(sb)->fs_max_size / MYFS_INFO(sb)->block_size)
+	printk("myfs: write_begin - maxblks = %ld, usedblks = %ld\n",
+		maxblks, usedblks);
+
+	if (usedblks >= maxblks)
 	{
 		printk("myfs: write_begin[%pD] - insufficent space\n", file);
 		return -ENOMEM;
@@ -77,7 +78,7 @@ int myfs_write_end(struct file *file, struct address_space *mapping,
 	{
 		// 如果是第一次设为Dirty，则修改文件系统的已用块数
 		struct super_block *sb = inode->i_sb;
-		MYFS_INFO(sb)->used_blocks++;
+		atomic_long_inc(&MYFS_INFO(sb)->used_blocks);
 		printk("myfs: write_end[%pD] - set to dirty\n", file);
 	}
 	unlock_page(page);
@@ -93,39 +94,36 @@ static const struct address_space_operations myfs_aops = {
 	.set_page_dirty	= myset_page_dirty_no_writeback,
 };
 
-/*
- * File creation. Allocate an inode, and we're done..
- */
-/* SMP-safe */
-static int
-ramfs_mknod(struct inode *dir, struct dentry *dentry, umode_t mode, dev_t dev)
+// ---直接从ramfs照搬过来的部分---（起始）
+
+static int myfs_mknod(struct inode *dir, struct dentry *dentry, umode_t mode, dev_t dev)
 {
 	struct inode * inode = myfs_get_inode(dir->i_sb, dir, mode, dev);
 	int error = -ENOSPC;
 
 	if (inode) {
 		d_instantiate(dentry, inode);
-		dget(dentry);	/* Extra count - pin the dentry in core */
+		dget(dentry);
 		error = 0;
 		dir->i_mtime = dir->i_ctime = CURRENT_TIME;
 	}
 	return error;
 }
 
-static int ramfs_mkdir(struct inode * dir, struct dentry * dentry, umode_t mode)
+static int myfs_mkdir(struct inode * dir, struct dentry * dentry, umode_t mode)
 {
-	int retval = ramfs_mknod(dir, dentry, mode | S_IFDIR, 0);
+	int retval = myfs_mknod(dir, dentry, mode | S_IFDIR, 0);
 	if (!retval)
 		inc_nlink(dir);
 	return retval;
 }
 
-static int ramfs_create(struct inode *dir, struct dentry *dentry, umode_t mode, bool excl)
+static int myfs_create(struct inode *dir, struct dentry *dentry, umode_t mode, bool excl)
 {
-	return ramfs_mknod(dir, dentry, mode | S_IFREG, 0);
+	return myfs_mknod(dir, dentry, mode | S_IFREG, 0);
 }
 
-static int ramfs_symlink(struct inode * dir, struct dentry *dentry, const char * symname)
+static int myfs_symlink(struct inode * dir, struct dentry *dentry, const char * symname)
 {
 	struct inode *inode;
 	int error = -ENOSPC;
@@ -144,6 +142,8 @@ static int ramfs_symlink(struct inode * dir, struct dentry *dentry, const char *
 	return error;
 }
 
+// ---直接从ramfs照搬过来的部分---（终止）
+
 static int myfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 {
 	struct super_block *sb = dentry->d_sb;
@@ -151,7 +151,7 @@ static int myfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	buf->f_bsize = sb->s_blocksize;
 	buf->f_namelen = NAME_MAX;
 	buf->f_blocks = MYFS_INFO(sb)->fs_max_size / sb->s_blocksize;
-	buf->f_bavail = buf->f_bfree = buf->f_blocks - MYFS_INFO(sb)->used_blocks;
+	buf->f_bavail = buf->f_bfree = buf->f_blocks - atomic_long_read(&MYFS_INFO(sb)->used_blocks);
 	if (buf->f_bavail < 0)
 		buf->f_bavail = buf->f_bfree = 0;
 	printk("myfs: statfs - maxblks = %llu, freeblks = %llu\n", buf->f_blocks, buf->f_bfree);
@@ -173,12 +173,12 @@ int myfs_unlink(struct inode *dir, struct dentry *dentry)
 		atomic_long_inc(&inode->i_sb->s_remove_count);
 
 		// 减掉文件系统的页面计数
-		MYFS_INFO(sb)->used_blocks -= inode->i_mapping->nrpages;
+		atomic_long_sub(inode->i_mapping->nrpages, &MYFS_INFO(sb)->used_blocks);
 
 		// 如果link计数为0，则完全删除该文件在内存中对应的所有Dirty页
 		truncate_inode_pages(inode->i_mapping, 0);
 
-		printk("myfs: unlink[%pD] - final delete\n", dentry);
+		printk("myfs: unlink[somefile under %pD] - final delete\n", dentry);
 	}
 
 	dput(dentry);
@@ -210,14 +210,14 @@ static const struct inode_operations myfs_file_inode_operations = {
 };
 
 static const struct inode_operations myfs_dir_inode_operations = {
-	.create		= ramfs_create,
+	.create		= myfs_create,
 	.lookup		= simple_lookup,
 	.link		= simple_link,
 	.unlink		= myfs_unlink,
-	.symlink	= ramfs_symlink,
-	.mkdir		= ramfs_mkdir,
+	.symlink	= myfs_symlink,
+	.mkdir		= myfs_mkdir,
 	.rmdir		= simple_rmdir,
-	.mknod		= ramfs_mknod,
+	.mknod		= myfs_mknod,
 	.rename		= simple_rename,
 };
 
@@ -255,5 +255,3 @@ struct inode *myfs_get_inode(struct super_block *sb,
 	}
 	return inode;
 }
-
-// ---直接照搬过来的部分---（终止）

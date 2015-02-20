@@ -25,7 +25,7 @@ struct myfs_fs_info {
 	unsigned long file_max_size;	// 文件大小限制，默认是MAX_LFS_FILESIZE
 	unsigned long block_size;		// 默认是PAGE_CACHE_SIZE
 	umode_t root_mode;				// 文件系统根目录权限位，默认是DEFAULT_MODE
-    unsigned long used_blocks;		// 文件系统已用页面数
+    atomic_long_t used_blocks;		// 文件系统已用页面数
 };
 
 extern const struct super_operations myfs_super_ops;
