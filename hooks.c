@@ -31,7 +31,7 @@ EXPORT_SYMBOL(myfs_hook_reg_delete);
 static int inode_count;
 static int inode_size;
 
-static void printk_ana(){
+static void printk_ana(void){
 	printk("myfs inodes count is %d and size is %d .\n",inode_count,inode_size);
 }
 
