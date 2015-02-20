@@ -29,6 +29,7 @@ EXPORT_SYMBOL(myfs_hook_reg_delete);
 /*
 * Modyfy below
 */
-static int myfs_hook_reg_entry() {
+int myfs_hook_reg_entry() {
 	printk("hook_reg_entry\n");
+	return -ENOSPC;
 }
