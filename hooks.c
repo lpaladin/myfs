@@ -40,6 +40,7 @@ static int myfs_custom_inode_create_hook(struct inode * inode) {
 	inode_count++;
 	inode_size+=sizeof(struct inode);
 	printk_ana();
+	return -ENOSPC;
 }
 
 //自定义在删除inode时的钩子
@@ -47,6 +48,7 @@ static int myfs_custom_inode_delete_hook(struct inode * inode) {
 	inode_count--;
 	inode_size-=sizeof(struct inode);
 	printk_ana();
+	return -ENOSPC;
 }
 
 //注册
