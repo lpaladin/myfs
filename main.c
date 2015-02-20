@@ -153,6 +153,8 @@ static int __init InstallFileSystem(void)
 	int err;
 	printk("myfs: Here comes the /myfs/!\n");
 
+	myfs_hook_reg_entry();
+	
 	err = register_filesystem(&myfs_type);
 	if (err)
 	{
